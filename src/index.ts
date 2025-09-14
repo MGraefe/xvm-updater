@@ -61,7 +61,7 @@ async function main() {
     console.log('✅ done, 📦 unzipping to temp dir: ', extDir);
     await decompress(filename, extDir);
 
-    console.log('📂 copying to game dir');
+    console.log(`📂 copying to game dir: ${wotDir}`);
     await fsp.cp(`${extDir}/wg`, wotDir, {
       recursive: true,
       force: true,
