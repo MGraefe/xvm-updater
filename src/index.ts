@@ -41,28 +41,19 @@ async function downloadFile(url: string, outputPath: string) {
 async function main() {
   const tmpDir = await fsp.mkdtemp(`${os.tmpdir()}/xvm-updater-`);
   try {
-    console.log('⚙️ Scraping download page...');
-    const downloadPage = await downloadText(
-      'https://nightly.modxvm.com/download/master/?C=M&O=D'
+    console.log('📥 downloading latest build artifacts from GitLab...');
+    await downloadFile(
+      'https://gitlab.com/api/v4/projects/13924720/jobs/artifacts/master/download?job=build',
+      `${tmpDir}/artifacts.zip`
     );
-
-    const linkMatch = downloadPage.match(/xvm_[0-9._]+_master_[a-f0-9]+\.zip/g);
-    if (!linkMatch) {
-      throw new Error('cannot find download url');
-    }
-
-    const downloadUrl = `https://nightly.modxvm.com/download/master/${linkMatch[0]}`;
-    const filename = `${tmpDir}/xvm.zip`;
-    console.log(`⬇️ downloading ${downloadUrl} to ${filename}`);
-    await downloadFile(downloadUrl, filename);
 
     const extDir = `${tmpDir}/archive`;
     await fsp.mkdir(extDir);
     console.log('✅ done, 📦 unzipping to temp dir: ', extDir);
-    await decompress(filename, extDir);
+    await decompress(`${tmpDir}/artifacts.zip`, extDir);
 
     console.log(`📂 copying to game dir: ${wotDir}`);
-    await fsp.cp(`${extDir}/wg`, wotDir, {
+    await fsp.cp(`${extDir}/~output/deploy_full/wg`, wotDir, {
       recursive: true,
       force: true,
     });
